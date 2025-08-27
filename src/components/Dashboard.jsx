@@ -5,6 +5,7 @@ import DriversSection from './DriversSection';
 const Dashboard = ({ user, onSignOut }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [driverFilter, setDriverFilter] = useState({ type: 'all', value: null });
   const [jobs, setJobs] = useState([]);
   const [updates, setUpdates] = useState([]);
   const [news, setNews] = useState([]);
@@ -57,11 +58,14 @@ const Dashboard = ({ user, onSignOut }) => {
       icon: '🚛',
       hasDropdown: true,
       dropdownItems: [
-        { id: 'driver-roster', label: 'Driver Roster', icon: '👥' },
-        { id: 'driver-applications', label: 'Driver Applications', icon: '📋' },
-        { id: 'driver-documents', label: 'Driver Documents', icon: '📄' },
-        { id: 'driver-performance', label: 'Driver Performance', icon: '📊' },
-        { id: 'driver-training', label: 'Driver Training', icon: '🎓' }
+        { id: 'all-drivers', label: 'All Drivers', icon: '👥', filterType: 'all' },
+        { id: 'my-drivers', label: 'My Drivers', icon: '👤', filterType: 'my' },
+        { id: 'awaiting-safety-check', label: 'Awaiting Safety Check', icon: '⏳', filterType: 'status', filterValue: 'Awaiting Safety Check' },
+        { id: 'safety-processing', label: 'Safety Processing', icon: '⚙️', filterType: 'status', filterValue: 'Safety Processing' },
+        { id: 'carrier-safety-review', label: 'Carrier Safety Review', icon: '🔍', filterType: 'status', filterValue: 'Carrier Safety Review' },
+        { id: 'submitted-to-carrier', label: 'Submitted to Carrier', icon: '📤', filterType: 'status', filterValue: 'Submitted to Carrier' },
+        { id: 'hired', label: 'Hired', icon: '✅', filterType: 'status', filterValue: 'Hired' },
+        { id: 'closed-files', label: 'Closed Files', icon: '📁', filterType: 'status', filterValue: 'Closed Files' }
       ]
     },
     { 
@@ -143,8 +147,17 @@ const Dashboard = ({ user, onSignOut }) => {
     }
   };
 
-  const handleDropdownItemClick = (itemId) => {
-    setActiveSection(itemId);
+  const handleDropdownItemClick = (itemId, dropdownItem) => {
+    // Handle driver filters differently
+    if (dropdownItem && dropdownItem.filterType) {
+      setActiveSection('drivers');
+      setDriverFilter({
+        type: dropdownItem.filterType,
+        value: dropdownItem.filterValue || null
+      });
+    } else {
+      setActiveSection(itemId);
+    }
     setActiveDropdown(null);
   };
 
@@ -264,7 +277,7 @@ const Dashboard = ({ user, onSignOut }) => {
         return renderDashboard();
       case 'drivers':
       case 'driver-roster':
-        return <DriversSection />;
+        return <DriversSection filter={driverFilter} />;
       case 'jobs':
         return (
           <div className="p-6">
@@ -364,7 +377,7 @@ const Dashboard = ({ user, onSignOut }) => {
                           {item.dropdownItems.map(dropdownItem => (
                             <button
                               key={dropdownItem.id}
-                              onClick={() => handleDropdownItemClick(dropdownItem.id)}
+                              onClick={() => handleDropdownItemClick(dropdownItem.id, dropdownItem)}
                               className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             >
                               {dropdownItem.label}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-const DriversSection = () => {
+const DriversSection = ({ filter }) => {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,6 +41,15 @@ const DriversSection = () => {
     loadDrivers();
   }, []);
 
+  useEffect(() => {
+    // Update status filter when external filter changes
+    if (filter && filter.type === 'status' && filter.value) {
+      setStatusFilter(filter.value);
+    } else if (filter && filter.type === 'all') {
+      setStatusFilter('All Statuses');
+    }
+  }, [filter]);
+
   const loadDrivers = async () => {
     setLoading(true);
     try {
@@ -70,7 +79,11 @@ const DriversSection = () => {
 
     const matchesStatus = statusFilter === 'All Statuses' || driver.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    // Handle "My Drivers" filter - show drivers assigned to current user
+    const matchesMyDrivers = !filter || filter.type !== 'my' || 
+      (driver.recruiter_name && driver.recruiter_name.toLowerCase().includes('rebecca'));
+
+    return matchesSearch && matchesStatus && matchesMyDrivers;
   });
 
   const handleSelectAll = (checked) => {
