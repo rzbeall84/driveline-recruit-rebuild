@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import DriversSection from './DriversSection';
 
 const Dashboard = ({ user, onSignOut }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [updates, setUpdates] = useState([]);
   const [news, setNews] = useState([]);
@@ -43,15 +45,108 @@ const Dashboard = ({ user, onSignOut }) => {
   }, []);
 
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
-    { id: 'drivers', label: 'Drivers', icon: '🚛' },
-    { id: 'jobs', label: 'Jobs', icon: '💼' },
-    { id: 'carriers', label: 'Carriers', icon: '🏢' },
-    { id: 'recruiters', label: 'Recruiters', icon: '👥' },
-    { id: 'admin', label: 'Admin', icon: '⚙️' },
-    { id: 'operations', label: 'Operations', icon: '📊' },
-    { id: 'safety', label: 'Safety', icon: '🛡️' }
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard', 
+      icon: '🏠',
+      hasDropdown: false
+    },
+    { 
+      id: 'drivers', 
+      label: 'Drivers', 
+      icon: '🚛',
+      hasDropdown: true,
+      dropdownItems: [
+        { id: 'driver-roster', label: 'Driver Roster', icon: '👥' },
+        { id: 'driver-applications', label: 'Driver Applications', icon: '📋' },
+        { id: 'driver-documents', label: 'Driver Documents', icon: '📄' },
+        { id: 'driver-performance', label: 'Driver Performance', icon: '📊' },
+        { id: 'driver-training', label: 'Driver Training', icon: '🎓' }
+      ]
+    },
+    { 
+      id: 'jobs', 
+      label: 'Jobs', 
+      icon: '💼',
+      hasDropdown: false
+    },
+    { 
+      id: 'carriers', 
+      label: 'Carriers', 
+      icon: '🏢',
+      hasDropdown: false
+    },
+    { 
+      id: 'recruiters', 
+      label: 'Recruiters', 
+      icon: '👥',
+      hasDropdown: true,
+      dropdownItems: [
+        { id: 'recruiter-roster', label: 'Recruiter Roster', icon: '👥' },
+        { id: 'recruiter-performance', label: 'Recruiter Performance', icon: '📈' },
+        { id: 'recruiter-commissions', label: 'Recruiter Commissions', icon: '💰' },
+        { id: 'recruiter-training', label: 'Recruiter Training', icon: '🎓' }
+      ]
+    },
+    { 
+      id: 'admin', 
+      label: 'Admin', 
+      icon: '⚙️',
+      hasDropdown: true,
+      dropdownItems: [
+        { id: 'recruiter-roster', label: 'Recruiter Roster', icon: '👥' },
+        { id: 'admin-roster', label: 'Admin Roster', icon: '👨‍💼' },
+        { id: 'email-templates', label: 'Email Templates', icon: '📧' },
+        { id: 'carrier-files', label: 'Carrier Files', icon: '📁' },
+        { id: 'user-management', label: 'User Management', icon: '👤' },
+        { id: 'backup-management', label: 'Backup Management', icon: '💾' },
+        { id: 'billing-history', label: 'Billing History', icon: '💳' },
+        { id: 'settings', label: 'Settings', icon: '⚙️' }
+      ]
+    },
+    { 
+      id: 'operations', 
+      label: 'Operations', 
+      icon: '📊',
+      hasDropdown: true,
+      dropdownItems: [
+        { id: 'dispatch', label: 'Dispatch', icon: '📡' },
+        { id: 'load-management', label: 'Load Management', icon: '📦' },
+        { id: 'route-planning', label: 'Route Planning', icon: '🗺️' },
+        { id: 'fleet-tracking', label: 'Fleet Tracking', icon: '🚛' }
+      ]
+    },
+    { 
+      id: 'safety', 
+      label: 'Safety', 
+      icon: '🛡️',
+      hasDropdown: true,
+      dropdownItems: [
+        { id: 'safety-reports', label: 'Safety Reports', icon: '📋' },
+        { id: 'incident-management', label: 'Incident Management', icon: '⚠️' },
+        { id: 'compliance-tracking', label: 'Compliance Tracking', icon: '✅' },
+        { id: 'safety-training', label: 'Safety Training', icon: '🎓' }
+      ]
+    }
   ];
+
+  const toggleDropdown = (itemId) => {
+    setActiveDropdown(activeDropdown === itemId ? null : itemId);
+  };
+
+  const handleSectionClick = (sectionId, hasDropdown) => {
+    if (hasDropdown) {
+      toggleDropdown(sectionId);
+    } else {
+      setActiveSection(sectionId);
+      setActiveDropdown(null);
+    }
+  };
+
+  const handleDropdownItemClick = (itemId) => {
+    setActiveSection(itemId);
+    setActiveDropdown(null);
+  };
 
   const renderDashboard = () => (
     <div className="p-6 space-y-6">
@@ -168,14 +263,8 @@ const Dashboard = ({ user, onSignOut }) => {
       case 'dashboard':
         return renderDashboard();
       case 'drivers':
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-blue-900 mb-6">Drivers</h1>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <p className="text-gray-600">Driver management system coming soon...</p>
-            </div>
-          </div>
-        );
+      case 'driver-roster':
+        return <DriversSection />;
       case 'jobs':
         return (
           <div className="p-6">
@@ -236,54 +325,76 @@ const Dashboard = ({ user, onSignOut }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-blue-800 text-white shadow-lg">
+      <header className="bg-blue-600 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-3">
             <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <span className="text-2xl font-bold">DriveLine Recruit</span>
+              <div className="flex items-center space-x-2">
+                <div className="bg-white p-1 rounded">
+                  <span className="text-blue-600 text-xl font-bold">📋</span>
+                </div>
+                <span className="text-white text-xl font-bold">DriveLine Recruit</span>
               </div>
               
-              <nav className="hidden md:flex space-x-6">
+              <nav className="hidden md:flex space-x-2">
                 {navigationItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      activeSection === item.id
-                        ? 'bg-blue-700 text-white'
-                        : 'text-blue-100 hover:bg-blue-700 hover:text-white'
-                    }`}
-                  >
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
-                  </button>
+                  <div key={item.id} className="relative">
+                    <button
+                      onClick={() => handleSectionClick(item.id, item.hasDropdown)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        activeSection === item.id || activeSection.startsWith(item.id) || activeDropdown === item.id
+                          ? 'bg-white text-blue-600 border border-blue-200'
+                          : 'text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {item.label}
+                      {item.hasDropdown && (
+                        <span className="ml-1 text-xs">
+                          {activeDropdown === item.id ? '▲' : '▼'}
+                        </span>
+                      )}
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {item.hasDropdown && activeDropdown === item.id && (
+                      <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div className="py-1">
+                          {item.dropdownItems.map(dropdownItem => (
+                            <button
+                              key={dropdownItem.id}
+                              onClick={() => handleDropdownItemClick(dropdownItem.id)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              {dropdownItem.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </nav>
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="text-blue-100 hover:text-white">
-                🔍
+              <button className="text-white hover:text-gray-200">
+                <span className="text-lg">🔍</span>
               </button>
               <div className="flex items-center space-x-2">
                 <img
                   src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                   alt="Profile"
-                  className="w-8 h-8 rounded-full"
+                  className="w-8 h-8 rounded-full border-2 border-white"
                 />
-                <div className="text-sm">
+                <div className="text-sm text-white">
                   <div className="font-medium">Rebecca</div>
                   <div className="text-blue-200">Beall</div>
                 </div>
               </div>
-              <button
-                onClick={onSignOut}
-                className="bg-blue-700 hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Sign Out
+              <button className="text-white hover:text-gray-200">
+                <span className="text-lg">↗️</span>
               </button>
             </div>
           </div>
