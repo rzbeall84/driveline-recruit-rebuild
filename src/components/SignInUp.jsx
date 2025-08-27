@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { signIn, signUp, submitRecruiterApplication } from '../lib/auth.js'
 import { sendWelcomeEmail, sendAdminNotification } from '../lib/email.js'
 
-const SignInUp = () => {
+const SignInUp = ({ onAuthSuccess }) => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('signup')
   const [currentStep, setCurrentStep] = useState(1)
@@ -69,8 +69,10 @@ const SignInUp = () => {
       setError(error)
     } else {
       setSuccess('Successfully signed in!')
-      // Redirect to dashboard or home
-      setTimeout(() => navigate('/'), 1500)
+      // Call the auth success callback with user data
+      if (onAuthSuccess && data.user) {
+        onAuthSuccess(data.user)
+      }
     }
     
     setLoading(false)
