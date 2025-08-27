@@ -54,9 +54,9 @@ const DriversSection = ({ filter }) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('drivers')
+        .from('driver_master_info')
         .select('*')
-        .order('updated_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading drivers:', error);
@@ -75,13 +75,14 @@ const DriversSection = ({ filter }) => {
       `${driver.first_name} ${driver.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (driver.email && driver.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (driver.phone && driver.phone.includes(searchTerm)) ||
+      (driver.cell_phone && driver.cell_phone.includes(searchTerm)) ||
       (driver.status && driver.status.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus = statusFilter === 'All Statuses' || driver.status === statusFilter;
 
     // Handle "My Drivers" filter - show drivers assigned to current user
     const matchesMyDrivers = !filter || filter.type !== 'my' || 
-      (driver.recruiter_name && driver.recruiter_name.toLowerCase().includes('rebecca'));
+      (driver.recruiter_user_id && driver.recruiter_user_id === 'b163c5f0-1ceb-4854-9f4f-888446705ac7');
 
     return matchesSearch && matchesStatus && matchesMyDrivers;
   });
@@ -252,7 +253,7 @@ const DriversSection = ({ filter }) => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
-                      {driver.phone || 'No phone'}
+                      {driver.cell_phone || driver.phone || 'No phone'}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(driver.status)}`}>
